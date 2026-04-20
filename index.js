@@ -298,3 +298,159 @@ let myData = [
       "total_millions": "52"
     }
   ]
+
+let familyCounts = d3.rollup(myData, function(v) { return v.length; }, function(d) { return d.family; });
+
+let data = [];
+familyCounts.forEach(function(count, family) {
+    data.push({family: family, count: count});
+});
+
+data.sort(function(a, b) {return b.count - a.count;});
+
+// bar chart!
+let marginTop = 50,
+    marginRight = 30,
+    marginBottom = 70,
+    marginLeft = 70;
+
+let width = 600 - marginLeft - marginRight;
+let height = 500 - marginTop - marginBottom;
+
+let svg = d3.select("#barchart")
+    .append("svg")
+    .attr("width", width + marginLeft + marginRight)
+    .attr("height", height + marginTop + marginBottom)
+    .append("g")
+    .attr("transform", "translate(" + marginLeft + "," + marginTop + ")");
+
+let xScale = d3.scaleBand()
+    .domain(data.map(function(d) {return d.family;}))
+    .range([0, width])
+    .padding(0.05);
+
+let yScale = d3.scaleLinear()
+    .domain([0, d3.max(data, function(d) {return d.count;}) + 1])
+    .range([height, 0]);
+
+
+svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(xScale))
+    .selectAll("text")
+    .attr("transform", "translate(-10,0)rotate(-20)")
+    .style("text-anchor", "end");
+
+svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + marginBottom - 5)
+    .attr("text-anchor", "middle")
+    .attr("class", "axis-label")
+    .text("Language Family");
+
+svg.append("g")
+    .call(d3.axisLeft(yScale));
+
+svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -marginLeft + 15)
+    .attr("text-anchor", "middle")
+    .attr("class", "axis-label")
+    .text("Number of Languages");
+
+
+let bars = svg.selectAll("rect")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("x", function(d) {return xScale(d.family);})
+    .attr("y", function(d) {return yScale(d.count);})
+    .attr("width", xScale.bandwidth())
+    .attr("height", function(d) {return height - yScale(d.count);});
+
+bars.on("click", function(event, d) {
+    let alreadySelected = d3.select(this).classed("selected");
+    bars.classed("selected", false);
+    if (alreadySelected === false) {
+        d3.select(this).classed("selected", true);
+    }
+});
+
+// pie chart!
+let pieWidth = 650,
+    pieHeight = 650,
+    pieMargin = 40;
+
+let radius = Math.min(pieWidth, pieHeight) / 2 - pieMargin - 80;
+
+let pieSvg = d3.select("#piechart")
+    .append("svg")
+    .attr("width", pieWidth)
+    .attr("height", pieHeight)
+    .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + (pieHeight / 2) + ")");
+
+let pieData = [];
+    familyCounts.forEach(function(count, family) {
+        pieData.push({family: family, count: count});
+    });
+    pieData.sort(function(a, b) {return b.count - a.count;});
+
+let color = d3.scaleOrdinal(d3.schemeSet3)
+    .domain(pieData.map(function(d) {return d.family;}));
+
+let pieLayout = d3.pie()
+    .value(function(d) {return d.count;});
+
+let slicesWithAngles = pieLayout(pieData);
+
+let arcGenerator = d3.arc()
+    .innerRadius(0)
+    .outerRadius(radius);
+
+let arcs = pieSvg.selectAll("path")
+    .data(slicesWithAngles)
+    .enter()
+    .append("path")
+    .attr("d", arcGenerator)
+    .attr("fill", function(d) {return color(d.data.family);})
+    .attr("class", "slice");
+
+let LineOne = pieSvg.append("text")
+    .attr("text-anchor", "middle")
+    .attr("dy", "-9em")
+    .attr("class", "pie-label");
+
+let LineTwo = pieSvg.append("text")
+    .attr("text-anchor", "middle")
+    .attr("dy", "-9.9em")
+    .attr("class", "pie-label");
+
+arcs.on("click", function(event, d) {
+    let sliceAngle = d.endAngle - d.startAngle;
+    let fullCircle = 2 * Math.PI;
+    let percentage = ((sliceAngle / fullCircle) * 100).toFixed(1);
+    LineOne.text(d.data.family);
+    LineTwo.text(percentage + "%");
+});
+
+let legend = pieSvg.selectAll(".legend")
+    .data(pieData)
+    .enter()
+    .append("g")
+    .attr("transform", function(d, i) {
+        let xPosition = radius + 20;
+        let yPosition = -radius + (i * 25);
+        return "translate(" + xPosition + "," + yPosition + ")";
+    });
+
+legend.append("rect")
+    .attr("class", "legend-rect")
+    .attr("fill", function(d) {return color(d.family);});
+
+legend.append("text")
+    .text(function(d) {return d.family;})
+    .attr("x", 20)
+    .attr("y", 10)
+    .attr("class", "legend-text");

@@ -1,0 +1,32 @@
+
+#barchart rect {
+    stroke: black;
+    stroke-width: 0.5px;
+    fill: green;
+    cursor: pointer;
+  }
+
+#barchart rect.selected {
+    fill: pink;
+  }
+
+#piechart .slice {
+    stroke: black;
+    stroke-width: 1px;
+}
+
+.legend-rect {
+    stroke: black;
+    width: 15px;
+    height: 15px;
+}
+
+.legend-text {
+    font-size: 13px;
+}
+
+.pie-label {
+    font-size: 25px;
+    fill: black;
+    pointer-events: none;
+}
