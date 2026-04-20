@@ -299,7 +299,7 @@ let myData = [
     }
   ]
 
-let familyCounts = d3.rollup(myData, function(v) { return v.length; }, function(d) { return d.family; });
+let familyCounts = d3.rollup(myData, function(v) {return v.length;}, function(d) { return d.family; });
 
 let data = [];
 familyCounts.forEach(function(count, family) {
@@ -338,12 +338,12 @@ svg.append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(xScale))
     .selectAll("text")
-    .attr("transform", "translate(-10,0)rotate(-20)")
+    .attr("transform", "translate(-10,0)rotate(-30)")
     .style("text-anchor", "end");
 
 svg.append("text")
     .attr("x", width / 2)
-    .attr("y", height + marginBottom - 5)
+    .attr("y", height + marginBottom - 4)
     .attr("text-anchor", "middle")
     .attr("class", "axis-label")
     .text("Language Family");
