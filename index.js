@@ -297,8 +297,9 @@ let myData = [
       "second_language_millions": "11",
       "total_millions": "52"
     }
-  ]
+  ];
 
+// General data stuff
 let familyCounts = d3.rollup(myData, function(v) {return v.length;}, function(d) { return d.family; });
 
 let data = [];
@@ -309,6 +310,7 @@ familyCounts.forEach(function(count, family) {
 data.sort(function(a, b) {return b.count - a.count;});
 
 // bar chart!
+// setting margins, width, and height below
 let marginTop = 50,
     marginRight = 30,
     marginBottom = 70,
@@ -324,26 +326,31 @@ let svg = d3.select("#barchart")
     .append("g")
     .attr("transform", "translate(" + marginLeft + "," + marginTop + ")");
 
+// arranging the bars (rectangles) width and assigning the language family to each bar
 let xScale = d3.scaleBand()
     .domain(data.map(function(d) {return d.family;}))
     .range([0, width])
-    .padding(0.05);
+    // Deciding how much space we want between the bars
+    .padding(0.1);
 
+// arranging the bars (rectangles) height and adjusting it based on the count
 let yScale = d3.scaleLinear()
     .domain([0, d3.max(data, function(d) {return d.count;}) + 1])
     .range([height, 0]);
-
 
 svg.append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(xScale))
     .selectAll("text")
+    // we need to rotate the x axis labels because otherwise they overlap
     .attr("transform", "translate(-10,0)rotate(-30)")
     .style("text-anchor", "end");
 
 svg.append("text")
+    //centers x axis label
     .attr("x", width / 2)
-    .attr("y", height + marginBottom - 4)
+    // puts x axis label below the language family labels
+    .attr("y", height + marginBottom - 4 )
     .attr("text-anchor", "middle")
     .attr("class", "axis-label")
     .text("Language Family");
@@ -353,13 +360,15 @@ svg.append("g")
 
 svg.append("text")
     .attr("transform", "rotate(-90)")
+    // centers y axis label
     .attr("x", -height / 2)
+    // puts y axis label beside the count aka number of languages
     .attr("y", -marginLeft + 15)
     .attr("text-anchor", "middle")
     .attr("class", "axis-label")
     .text("Number of Languages");
 
-
+// finally putting it all together
 let bars = svg.selectAll("rect")
     .data(data)
     .enter()
@@ -369,6 +378,7 @@ let bars = svg.selectAll("rect")
     .attr("width", xScale.bandwidth())
     .attr("height", function(d) {return height - yScale(d.count);});
 
+// creation of the click effect
 bars.on("click", function(event, d) {
     let alreadySelected = d3.select(this).classed("selected");
     bars.classed("selected", false);
@@ -384,6 +394,7 @@ let pieWidth = 650,
 
 let radius = Math.min(pieWidth, pieHeight) / 2 - pieMargin - 80;
 
+// creating the pie chart svg
 let pieSvg = d3.select("#piechart")
     .append("svg")
     .attr("width", pieWidth)
@@ -391,19 +402,15 @@ let pieSvg = d3.select("#piechart")
     .append("g")
     .attr("transform", "translate(" + width / 2 + "," + (pieHeight / 2) + ")");
 
-let pieData = [];
-    familyCounts.forEach(function(count, family) {
-        pieData.push({family: family, count: count});
-    });
-    pieData.sort(function(a, b) {return b.count - a.count;});
-
+// giving the pie chart its colors, schemeset3 its categorical and has over 12 colors!
 let color = d3.scaleOrdinal(d3.schemeSet3)
-    .domain(pieData.map(function(d) {return d.family;}));
+    .domain(data.map(function(d) {return d.family;}));
 
+// generate pie shape
 let pieLayout = d3.pie()
     .value(function(d) {return d.count;});
 
-let slicesWithAngles = pieLayout(pieData);
+let slicesWithAngles = pieLayout(data);
 
 let arcGenerator = d3.arc()
     .innerRadius(0)
@@ -417,26 +424,33 @@ let arcs = pieSvg.selectAll("path")
     .attr("fill", function(d) {return color(d.data.family);})
     .attr("class", "slice");
 
+// Line for percentge of the languages
 let LineOne = pieSvg.append("text")
     .attr("text-anchor", "middle")
+    // We want it above the circle!
     .attr("dy", "-9em")
     .attr("class", "pie-label");
 
+// Line for language family
 let LineTwo = pieSvg.append("text")
     .attr("text-anchor", "middle")
+    // We want the percentage to be just above the pie chart
     .attr("dy", "-9.9em")
     .attr("class", "pie-label");
 
+// how the click works, calculates percentage, and displays LineOne and LineTwo
 arcs.on("click", function(event, d) {
     let sliceAngle = d.endAngle - d.startAngle;
     let fullCircle = 2 * Math.PI;
     let percentage = ((sliceAngle / fullCircle) * 100).toFixed(1);
     LineOne.text(d.data.family);
+  // adding a % onto the percentage number we just calculated
     LineTwo.text(percentage + "%");
 });
 
+// Creating a legend for my pie chart
 let legend = pieSvg.selectAll(".legend")
-    .data(pieData)
+    .data(data)
     .enter()
     .append("g")
     .attr("transform", function(d, i) {
@@ -445,12 +459,14 @@ let legend = pieSvg.selectAll(".legend")
         return "translate(" + xPosition + "," + yPosition + ")";
     });
 
+// legend box creation and color matching
 legend.append("rect")
     .attr("class", "legend-rect")
     .attr("fill", function(d) {return color(d.family);});
 
+// lining up the language families to the their corresponding legend boxes
 legend.append("text")
     .text(function(d) {return d.family;})
     .attr("x", 20)
-    .attr("y", 10)
+    .attr("y", 11)
     .attr("class", "legend-text");
