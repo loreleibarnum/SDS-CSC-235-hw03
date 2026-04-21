@@ -387,6 +387,8 @@ bars.on("click", function(event, d) {
     }
 });
 
+
+
 // pie chart!
 let pieWidth = 650,
     pieHeight = 650,
@@ -407,17 +409,17 @@ let color = d3.scaleOrdinal(d3.schemeSet3)
     .domain(data.map(function(d) {return d.family;}));
 
 // generate pie shape
-let pieLayout = d3.pie()
+let pieshape = d3.pie()
     .value(function(d) {return d.count;});
 
-let slicesWithAngles = pieLayout(data);
+let sliceangle = pieshape(data);
 
 let arcGenerator = d3.arc()
     .innerRadius(0)
     .outerRadius(radius);
 
 let arcs = pieSvg.selectAll("path")
-    .data(slicesWithAngles)
+    .data(sliceangle)
     .enter()
     .append("path")
     .attr("d", arcGenerator)
@@ -425,27 +427,27 @@ let arcs = pieSvg.selectAll("path")
     .attr("class", "slice");
 
 // Line for percentge of the languages
-let LineOne = pieSvg.append("text")
+let lineOne = pieSvg.append("text")
     .attr("text-anchor", "middle")
     // We want it above the circle!
     .attr("dy", "-9em")
     .attr("class", "pie-label");
 
 // Line for language family
-let LineTwo = pieSvg.append("text")
+let lineTwo = pieSvg.append("text")
     .attr("text-anchor", "middle")
     // We want the percentage to be just above the pie chart
     .attr("dy", "-9.9em")
     .attr("class", "pie-label");
 
-// how the click works, calculates percentage, and displays LineOne and LineTwo
+// how the click works, calculates percentage, and displays lineOne and LineTwo
 arcs.on("click", function(event, d) {
-    let sliceAngle = d.endAngle - d.startAngle;
-    let fullCircle = 2 * Math.PI;
-    let percentage = ((sliceAngle / fullCircle) * 100).toFixed(1);
-    LineOne.text(d.data.family);
+    let angle = d.endAngle - d.startAngle;
+    let circle = 2 * Math.PI;
+    let percentage = ((angle / circle) * 100).toFixed(1);
+    lineOne.text(d.data.family);
   // adding a % onto the percentage number we just calculated
-    LineTwo.text(percentage + "%");
+    lineTwo.text(percentage + "%");
 });
 
 // Creating a legend for my pie chart
@@ -454,9 +456,9 @@ let legend = pieSvg.selectAll(".legend")
     .enter()
     .append("g")
     .attr("transform", function(d, i) {
-        let xPosition = radius + 20;
-        let yPosition = -radius + (i * 25);
-        return "translate(" + xPosition + "," + yPosition + ")";
+        let xPos = radius + 20;
+        let yPos = -radius + (i * 25);
+        return "translate(" + xPos + "," + yPos + ")";
     });
 
 // legend box creation and color matching
