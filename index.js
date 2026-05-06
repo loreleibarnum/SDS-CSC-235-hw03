@@ -368,6 +368,15 @@ svg.append("text")
     .attr("class", "axis-label")
     .text("Number of Languages");
 
+svg.append("text")
+    //centers title label
+    .attr("x", width / 2)
+    // puts title label above graph
+    .attr("y", height + marginTop - 430)
+    .attr("text-anchor", "middle")
+    .attr("class", "axis-label")
+    .text("Number of Languages by Language Family");
+
 // finally putting it all together
 let bars = svg.selectAll("rect")
     .data(data)
@@ -472,3 +481,12 @@ legend.append("text")
     .attr("x", 20)
     .attr("y", 11)
     .attr("class", "legend-text");
+
+pieSvg.append("text")
+    //centers title label
+    // puts title label above graph
+    .attr("y", "-18em")
+    .attr("text-anchor", "middle")
+    .attr("class", "axis-label")
+    .text("Proportion of Languages by Language Family");
+
